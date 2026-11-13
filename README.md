@@ -1,192 +1,116 @@
-STER 1.0 Beta — Documentation
+# STER 1.0 Beta Guide
 
-1. Variable Declaration
+STER 1.0 Beta language · STER Compiler 1.0
 
-Variables must be declared at the beginning of the code. This block must contain only variable declarations and nothing else.
+## 1. Running a program
 
-For example:
+```text
+ster main.ster     Run a program
+ster -version      Show the version
+ster -help         Show help
+```
 
-{
-var
-x = 1
-b = 2
-"name" = "alex"
-}
+The main program file uses the `.ster` extension. Module files use the `.st` extension.
 
-Variable names must be written in quotation marks, such as ""name"".
+## 2. Program structure
 
-Example of incorrect code:
+All code must be written inside `{ }` blocks. The block order is:
 
-{
-var
-x = 1
-b = 3
-txt_print # Error
-}
+1. Module imports (`module.set`)
+2. Variable declarations (`var`)
+3. Custom commands (`cmd_custom`)
+4. Main code
 
-The "var" block must always be at the beginning of the code or after module imports.
+The module and variable blocks may appear in either order. Both must come before `cmd_custom` and the main code. Comments begin with `#`.
 
-2. Modules
-
-Modules extend the language's functionality and allow you to use commands that are defined in a module instead of creating them directly in your code.
-
-Module imports usually go before the "var" block, but they can also be placed after the "var" block, provided they appear before the main code begins.
-
-Importing modules
-
-Modules are imported using "module.set(module_name)".
-
-For example:
-
+```ster
 {
 module.set(random)
-module.set(another_module)
 }
-
-3. Output
-
-To print something to the command line or terminal, use "txt_print()".
-
-For example:
 
 {
 var
-"name" = "alex"
-x = 2
+name = "alex"
+x = 10
 }
 
 {
-txt_print(var=name)
-}
-
-Output:
-
-alex
-
-You can also print text directly:
-
-{
-txt_print("Hello", "ster!")
-}
-
-Output:
-
-Hello ster!
-
-4. User Input
-
-You can assign a variable's value directly from user input using "input()".
-
-For example:
-
-{
-var
-b = 0
+cmd_custom
+    (create_com(double(sum(2))))
 }
 
 {
-input(var=b)
-wrt_(var=result(mov_b))
+txt_print("Hello", var=name)
 }
+```
 
-- "input(var=b)" asks the user to enter a value for variable "b".
-- "wrt_(var=result(mov_b))" writes the value from "result" into "b".
+Code outside `{ }` causes error 50. An invalid block order causes error 53.
 
-After any mathematical calculation or user input operation, the result is stored in "result". If you do not specify where the result should be stored, an error will occur.
+## 3. Variables
 
-5. Mathematical Operations
+Variables can only be declared inside a `var` block. Only declarations are allowed in this block.
 
-Calculations are performed using the "sum_var()" command.
-
-For example:
-
-sum_var(a + b)
-
-This adds variables "a" and "b".
-
-Operators
-
-Operator| Description
-"+"| Addition
-"-"| Subtraction
-"*"| Multiplication
-"/"| Division
-"<"| Less than (not used in this block)
-">"| Greater than (not used in this block)
-"="| Equal to (not used in this block; for example, "10 = 7" is false)
-"!="| Not equal to (not used in this block; for example, "10 != 7" is true)
-
-The last four operators are comparison operators, according to their intended use in this documentation.
-
-6. Loops
-
-Loops are implemented using "loop()".
-
-For example:
-
+```ster
 {
 var
 x = 1
+price = 2.5
+name = "alex"
+numbers = [10, 20, 30]
 }
+```
 
-{
-loop(var=x) {
-    txt_print("Loops are working!")
-}
-}
+- Variable names are written without quotation marks. Quotation marks are used for strings.
+- Supported types: integers, floating-point numbers, strings, and lists.
+- Redeclaring a variable causes error 21. Using an undeclared variable causes error 20.
+- A variable can be referenced as `var=name` or simply as `name`.
 
-You can also use a loop with a numeric repetition count:
+System variables are always available and must not be declared (error 22): `result`, `ms`, `s`, `minutes`, and `hours`.
 
-loop((any_number))
+Reserved words: `var`, `if`, `then`, `else`, `loop`, `module.set`, `txt_print`, `input`, `sum_var`, `wrt_`, `cmd_custom`, `create_com`, `get.time`, `list_add`, `list_get`, `sum`.
 
-Replace "any_number" with the desired number of repetitions.
+## 4. Output: `txt_print`
 
-7. Creating Custom Commands
+```ster
+txt_print("Hello", "ster!")      # Hello ster!
+txt_print(var=name)               # alex
+txt_print("x =", var=x)           # x = 10
+txt_print("")                     # Prints an empty line
+```
 
-To create your own commands, add "cmd_custom" near the beginning of the code, after the variable declarations and module imports.
+Arguments are printed separated by spaces, followed by a newline. Lists are printed in the form `[10, 20, 30]`.
 
-For example:
+## 5. Input: `input`
 
-cmd_custom
-    (create_com(double(sum(2))))
+```ster
+input(var=b)
+```
 
-You can then use the custom command:
+`input(var=b)` reads a line and stores it in `b`. If the input is a number, the value is stored as a number; otherwise, it is stored as a string. No prompt is printed automatically; use `txt_print` to display one.
 
-{
-double(var=a)
-}
+Calling `input()` without a variable stores the input in `result`. If the input stream ends, error 32 occurs.
 
-This multiplies the value of variable "a" by 2.
+## 6. Calculations: `sum_var`
 
-You can also define commands that work with time:
+```ster
+sum_var(x + 5)       # result = x + 5; x remains unchanged
+sum_var(10 + 20)     # result = 30
+wrt_(x)              # Copies result into x
+```
 
-{
-cmd_custom
-    (create_com(fasttime(get.time(minutes))))
-}
+Every calculation stores its result in `result`; variables used in the expression are not changed. To save the result to a variable, use `wrt_(name)`.
 
-In this case, you do not need to use "wrt_". The system variables will be populated automatically.
+| Operator | Action |
+|---|---|
+| `+`, `-`, `*` | Addition, subtraction, multiplication |
+| `/` | Division. For example, `10 / 4 = 2.5`, while `10 / 5 = 2` |
+| `%` | Remainder |
 
-8. Getting the Current Time
+Parentheses and negative numbers are supported: `sum_var((a + 2) * 3)`. Division by zero causes error 40; integer overflow causes error 41. Arithmetic on strings and lists causes errors 30 or 31.
 
-The "get.time()" command writes time values into four variables:
+## 7. Conditions
 
-- Milliseconds
-- Seconds
-- Minutes
-- Hours
-
-9. Conditional Statements
-
-The "if" command allows you to specify a condition.
-
-For example:
-
-{
-var = 16
-}
-
-{
+```ster
 if(var=age > 10)
 then {
     txt_print("Access allowed")
@@ -194,109 +118,394 @@ then {
 else {
     txt_print("Access denied")
 }
+```
+
+Comparison operators (available only in `if` conditions):
+
+- `=` — equal to
+- `!=` — not equal to
+- `<` — less than
+- `>` — greater than
+
+The `else` block is optional, and conditions can be nested. Numbers can be compared with numbers, and strings with strings. Other type combinations cause error 30. An empty block causes error 54.
+
+## 8. Loops
+
+```ster
+loop(5) {
+    txt_print("Hello")
 }
 
-- If the condition is true, the "then" block executes.
-- If the condition is false, the "else" block executes.
+loop(var=x) {
+    txt_print("Loops work!")
+}
+```
 
-10. Lists
+The iteration count can be a number or a variable. A negative or non-integer count causes error 62. Zero is allowed. Loops can be nested.
 
-Lists can be read from and modified by adding new elements.
+## 9. Lists
 
-Declaring a list
-
+```ster
 {
 var
 numbers = [10, 20, 30]
 }
 
-Reading from a list
-
-txt_print(list_get(var=numbers, 10))
-
-This retrieves an element from the list using the "list_get()" command. The exact indexing behavior depends on the language's implementation.
-
-Adding an element to a list
-
+{
+txt_print(list_get(var=numbers, 0))     # Prints 10
 list_add(var=numbers, 40)
+list_get(var=numbers, 3)                # result = 40
+}
+```
 
-This adds "40" to the "numbers" list.
+- Indices start at 0. An invalid index causes error 61.
+- Lists can contain numbers and strings. Nested lists are not allowed (error 34).
+- As a standalone statement, `list_get(...)` stores the element in `result`. Inside `txt_print(...)` and `sum_var(...)`, it returns the element as a value.
 
-11. Error Codes
+## 10. Time: `get.time`
 
-Every error has its own error code.
+```ster
+get.time()           # Stores ms, s, minutes, and hours
+get.time(minutes)    # Stores only minutes
+```
 
-Code range| Error category| Description
-1–19| "SyntaxError"| Syntax errors
-20–29| "NameError"| Variable, function, and module errors
-30–39| "TypeError"| Data type and operation errors
-40–49| "MathError"| Mathematical errors
-50–59| "BlockError"| Block "{}" errors
-60–69| "RuntimeError"| Errors that occur during execution
+`ms` means milliseconds, `s` means seconds, and `minutes` and `hours` have their usual meanings. These system variables are populated automatically; do not use `wrt_` to set them.
 
-SyntaxError (1–19)
+## 11. Custom commands
 
-Code| Error name| Description
-1| "UnexpectedToken"| Unexpected token
-2| "MissingExpression"| Missing expression
-3| "MissingParenthesis"| Missing or unclosed parenthesis
-4| "InvalidSyntax"| Invalid syntax
-5| "MissingOperator"| Missing operator
-6| "InvalidAssignment"| Invalid assignment
+Custom commands are declared in a `{ cmd_custom ... }` block before the main code.
 
-NameError (20–29)
+Example: a command that doubles a value:
 
-Code| Error name| Description
-20| "UndefinedVariable"| Variable has not been declared
-21| "DuplicateVariable"| Variable declared more than once
-22| "ReservedName"| A reserved name was used
-23| "UndefinedFunction"| Function not found
-24| "DuplicateFunction"| Function declared more than once
-25| "ArgumentCountError"| Incorrect number of arguments
-26| "ModuleNotFoundError"| Module not found
+```ster
+{
+cmd_custom
+    (create_com(double(sum(2))))
+}
+```
 
-TypeError (30–39)
+`double(var=a)` stores `a * 2` in `result` without changing `a`. To save the result back to `a`, add `wrt_(a)`. `double(7)` stores `14` in `result`.
 
-Code| Error name| Description
-30| "TypeMismatch"| Incompatible data types
-31| "InvalidOperation"| Invalid operation
-32| "InvalidInputType"| Invalid input data type
-33| "InvalidReturnType"| Invalid return type
-34| "InvalidListElement"| Invalid list element
+A command can also be based on another command:
 
-MathError (40–49)
+```ster
+{
+cmd_custom
+    (create_com(fasttime(get.time(minutes))))
+}
+```
 
-Code| Error name| Description
-40| "DivisionByZero"| Division by zero
-41| "NumericOverflow"| Numeric overflow
-42| "InvalidNumber"| Invalid number
-43| "MathDomainError"| Value outside the valid domain of a mathematical operation
+Custom commands can contain multiple actions separated by `;` and can use parameters:
 
-BlockError (50–59)
+```ster
+{
+var
+hp = 100
+}
 
-Code| Error name| Description
-50| "MissingOpeningBlock"| Missing opening "{"
-51| "MissingClosingBlock"| Missing closing "}"
-52| "UnexpectedClosingBlock"| Unexpected closing "}"
-53| "InvalidBlockPlacement"| Block placed incorrectly
-54| "EmptyRequiredBlock"| Required block is empty
+{
+cmd_custom
+    (create_com(damage(sum_var(hp - var=amount); wrt_(hp))))
+}
 
-RuntimeError (60–69)
+{
+damage(20)      # hp is now 80
+}
+```
 
-Code| Error name| Description
-60| "StackOverflow"| Maximum stack depth exceeded
-61| "IndexOutOfRange"| List index out of range
-62| "InvalidLoopCount"| Invalid loop repetition count
-63| "FunctionNotCallable"| Object cannot be called as a function
+An identifier in the form `var=name` that is not declared in the `var` block is treated as a parameter. Arguments are assigned to parameters in order of their first appearance in the command body. For example, `random(1, 10)` passes `1` to `lo` and `10` to `hi`. Parameters are local to the command; other variables are shared.
 
-12. Error Message Example
+Rules:
 
-An error message may look like this:
+- The number of arguments must match the number of parameters (error 25). An unknown command causes error 23. A duplicate command name causes error 24.
+- A command can call other commands and itself. The call depth is limited to 200 (error 60).
+- A command is not a value. `txt_print(random(1, 10))` is invalid. Instead, call the command and then print `result`:
 
+```ster
+random(1, 10)
+txt_print(var=result)
+```
+
+## 12. Modules
+
+```ster
+{
+module.set(random)
+}
+```
+
+Module names are written without quotation marks. The module file is searched for in this order:
+
+1. `modules/name.st` next to the main program file
+2. `name.st` next to the main program file
+3. The STER standard library
+
+A module is loaded only once. Modules can import other modules. Module variables and commands are shared with the program. A missing module or a circular import causes error 26.
+
+Module files may contain only `module.set`, `var`, and `cmd_custom` blocks. Main program code is not allowed in a module.
+
+Standard modules:
+
+| Module | Commands |
+|---|---|
+| `random` | `random(lo, hi)`: stores a random integer from `lo` to `hi` in `result` |
+| `time` | `fasttime()`: stores the current time in `minutes` |
+
+## 13. Errors
+
+Error format:
+
+```text
 NameError (code: 20)
+File: main.ster
 Line 4: txt_print(score)
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Description: Variable 'score' is not declared.
+```
 
-This example indicates that the variable "score" has not been declared before it was used.
+Every error includes a category, code, filename, line number, source line, and description. Errors are displayed separately from regular output, and the program exits with code 1.
+
+| Category | Codes |
+|---|---|
+| `SyntaxError` | 1 `UnexpectedToken`, 2 `MissingExpression`, 3 `MissingParenthesis`, 4 `InvalidSyntax`, 5 `MissingOperator`, 6 `InvalidAssignment` |
+| `NameError` | 20 `UndefinedVariable`, 21 `DuplicateVariable`, 22 `ReservedName`, 23 `UndefinedFunction`, 24 `DuplicateFunction`, 25 `ArgumentCountError`, 26 `ModuleNotFoundError` |
+| `TypeError` | 30 `TypeMismatch`, 31 `InvalidOperation`, 32 `InvalidInputType`, 34 `InvalidListElement` |
+| `MathError` | 40 `DivisionByZero`, 41 `NumericOverflow`, 42 `InvalidNumber` |
+| `BlockError` | 50 `MissingOpeningBlock`, 51 `MissingClosingBlock`, 52 `UnexpectedClosingBlock`, 53 `InvalidBlockPlacement`, 54 `EmptyRequiredBlock` |
+| `RuntimeError` | 60 `StackOverflow`, 61 `IndexOutOfRange`, 62 `InvalidLoopCount`, 63 `FunctionNotCallable` |
+
+Syntax, name, and block errors are detected before the program runs, so no program output is produced. Type, math, and runtime errors occur during execution; any text already printed remains visible.
+
+## 14. Installation
+
+- **Android (Termux):** Place `STER-Compiler-src.zip` in Downloads and run `sh ~/install-ster.sh`. The script builds and installs the compiler.
+- **Linux:** Extract `ster-1.0-linux-x86_64.tar.gz` and run `sudo ./install.sh`.
+
+To verify the installation, run:
+
+```text
+ster -version
+```
+
+## 15. Command reference
+
+| Command | Description |
+|---|---|
+| `module.set(name)` | Loads the `name.st` module |
+| `var` | Declares a variable block |
+| `cmd_custom (create_com(...))` | Declares a custom command |
+| `txt_print(a, b, ...)` | Prints arguments separated by spaces, followed by a newline |
+| `input()` or `input(var=x)` | Reads a line and stores it in `result` or variable `x` |
+| `sum_var(expression)` | Evaluates an expression and stores the result in `result` |
+| `wrt_(name)` | Copies `result` into variable `name` |
+| `if(a ? b) then {...} else {...}` | Conditional; `?` is one of `=`, `!=`, `<`, `>` |
+| `loop(n) {...}` | Repeats a block `n` times |
+| `list_add(var=list, value)` | Appends a value to a list |
+| `list_get(var=list, index)` | Retrieves an element, storing it in `result` or returning it as a value |
+| `get.time()` or `get.time(field)` | Stores all time fields, or only the specified field |
+| `name(arguments)` | Calls a custom command |
+
+Where a single value is required (for example, as an argument to `txt_print`, `list_add`, `loop`, or a custom command), you can use a number, a string, a variable (`x` or `var=x`), or `list_get(...)`. Full expressions can be used in `sum_var` and `if`.
+
+## 16. Expressions and types
+
+- **Precedence:** parentheses, unary minus, then `*`, `/`, `%`, followed by `+` and `-`. Operators with the same precedence are evaluated from left to right.
+- An operation between integers produces an integer. An operation involving a floating-point number produces a floating-point number. Division produces an integer only when the division is exact: `10 / 5 = 2`, while `10 / 4 = 2.5`.
+- Integers range from `-9223372036854775808` to `9223372036854775807`. Exceeding these limits causes error 41.
+- Floating-point numbers are printed with up to 12 significant digits. For example, `0.1 + 0.2` is printed as `0.3`.
+- Strings and lists are not allowed in arithmetic: error 30 is raised when operand types differ, and error 31 when they are the same.
+- Numbers can be compared with numbers (for example, `1 = 1.0` is true), and strings can be compared with strings in character order (for example, `"apple" < "banana"`). Other comparisons cause error 30; comparing lists causes error 31.
+- Input `42` is parsed as the number `42`, `2.5` as the number `2.5`, and any other input as a string.
+- Strings support `\"`, `\\`, `\n`, and `\t`. Cyrillic characters are supported.
+
+## 17. Assigning a value to a variable
+
+Any calculation or `list_get` operation stores its result in `result`. To save it to a variable, use `wrt_(name)`, which copies `result` into the specified variable.
+
+```ster
+sum_var(x + 7)
+wrt_(x)          # x is now equal to x + 7
+```
+
+To assign a number using an expression, write `sum_var(0 + 7)` and then `wrt_(x)`.
+
+Values can also be assigned when a variable is declared in a `var` block or by using `input(var=x)`. To store a string from input, call `input()` and then `wrt_(name)`.
+
+`wrt_` copies a number or a string. It cannot write to a list (error 30) or to an undeclared variable (error 20).
+
+## 18. Custom commands in detail
+
+A command body can take these forms:
+
+```text
+create_com(double(sum(2)))                         Multiplies an argument by a number
+create_com(fasttime(get.time(minutes)))            Calls a built-in command
+create_com(twice(txt_print(var=w); txt_print(var=w)))  Performs multiple actions separated by ;
+```
+
+Example with a parameter:
+
+```ster
+{
+cmd_custom
+    (create_com(twice(txt_print(var=word); txt_print(var=word))))
+}
+
+{
+twice("hi")
+}
+```
+
+This prints `hi` twice.
+
+Rules:
+
+- A parameter is an identifier in the form `var=name` that is not declared in a `var` block. Parameters receive values in the order they first appear in the command body and are available only inside that command. Other variables are shared.
+- The number of arguments in a call must match the number of parameters (error 25). A command without parameters is called as `name()`.
+- A command declared with `sum(N)` accepts one argument and stores the multiplication result in `result`. It cannot be combined with named parameters.
+- A command can call only commands declared earlier, or itself. The call depth is limited to 200 (error 60).
+- A command name cannot be a reserved word (error 22) or a duplicate (error 24). Calling a variable as a command causes error 63; calling an unknown name causes error 23.
+
+## 19. Block rules
+
+| Code | When it occurs |
+|---|---|
+| 50 | Code appears outside `{ }`, including a `cmd_custom` block |
+| 51 | A block is not closed; `}` is missing |
+| 52 | An extra `}` appears |
+| 53 | A `var` block appears after the main code; a `var` block contains something other than declarations; `cmd_custom` appears after the main code; `module.set` appears after `cmd_custom`; or main code appears in a module |
+| 54 | An empty `{ }` block, or an empty body for `loop`, `then`, or `else` |
+
+## 20. Example: a custom module
+
+File `modules/game.st`:
+
+```ster
+{
+var
+    hp = 100
+}
+
+{
+cmd_custom
+    (create_com(damage(sum_var(hp - var=amount); wrt_(hp))))
+}
+```
+
+File `main.ster`:
+
+```ster
+{
+module.set(game)
+}
+
+{
+damage(30)
+txt_print("HP:", var=hp)
+}
+```
+
+Output:
+
+```text
+HP: 70
+```
+
+Module variables are shared with the program, so the same variable name cannot be declared twice (error 21). A module is loaded only once, even if `module.set` names it multiple times.
+
+## 21. Complete example: guess the number
+
+```ster
+{
+module.set(random)
+}
+
+{
+var
+    target = 0
+    guess = 0
+}
+
+{
+random(1, 10)
+wrt_(target)
+txt_print("Guess a number from 1 to 10:")
+input(var=guess)
+
+if(var=guess = var=target)
+then {
+    txt_print("Correct!")
+}
+else {
+    txt_print("No, the number was", var=target)
+}
+}
+```
+
+## 22. Common errors
+
+| What you see | Cause | What to do |
+|---|---|---|
+| `SyntaxError 1` at `txt_print(random(1, 10))` | A command is used as a value | Call `random(1, 10)`, then use `txt_print(var=result)` |
+| `BlockError 50` at `cmd_custom` | Missing `{ }` around the block | Wrap the block in `{ }` |
+| `NameError 20` at `txt_print(hello)` | An unquoted word is treated as a variable | Write `"hello"` |
+| `NameError 22` at `result = 0` | `result` is a system variable | Remove the declaration |
+| `NameError 22` at `s = 1` | `s`, `ms`, `minutes`, and `hours` are reserved | Choose another name |
+| `NameError 26` | The module was not found | Put `name.st` in `modules/` or next to the program |
+| A variable did not change after `sum_var(a + b)` | The result is stored only in `result` | Add `wrt_(a)` |
+| `MathError 40` in `random(10, 1)` | The second number is less than the first | Put the smaller number first |
+| `TypeError 30` in `if` | A number is being compared with a string | Check that the input is a number |
+| `RuntimeError 61` | The index is out of range; indexing starts at 0 | Use an index from `0` to `size - 1` |
+
+## 23. File commands
+
+File commands are built into the compiler; no module import is required. Paths use this form: `drive:folder(subfolder(file(arguments)))`.
+
+```ster
+{
+file_mkdir(c:myproject(files))
+file_create(c:myproject(notes.txt("Hello STER!")))
+file_append(c:myproject(notes.txt(" More.")))
+file_read(c:myproject(notes.txt(var=content)))
+}
+```
+
+| Command | Description |
+|---|---|
+| `file_create` | Creates a file. Text is optional. The folder must exist (error 70), and the file must not already exist (error 71). |
+| `file_write` | Replaces the contents of an existing file (error 74 if the file does not exist). |
+| `file_append` | Appends text to a file (error 74 if the file does not exist). |
+| `file_edit` | `("Apple", "STER")` replaces all matches. `("Apple", (line-3) "STER")` replaces matches only on line 3. If the text is not found, error 75 occurs. |
+| `file_read` | Reads a file into `var=name` or into `result`. |
+| `file_rename`, `file_copy` | Use `c:folder(old_name, new_name)`. If the new name already exists, error 71 occurs. |
+| `file_delete`, `file_clear` | Deletes a file or clears its contents. |
+| `file_mkdir`, `file_rmdir` | Creates nested folders; removes a folder and its contents. |
+| `file_move` | Uses `c:source(file), c:destination(file)`. If the destination file already exists, error 71 occurs. |
+| `file_size` | Use `var=size, unit=MB`. Units: `B`, `KB`, `MB`, `GB`. Without `unit`, the size is returned in bytes. |
+| `file_check` | Use `file_check(dir c:folder)` or `file_check(file c:folder)`. Stores the text `"true"` or `"false"` in `result`. |
+| `file_info` | `name=var=name`, `extension=var=ext`, `size=var=n`; also supports `created`, `modified`, and `path`. |
+
+File error codes (`FileError`, range 70–100):
+
+| Code | Name |
+|---|---|
+| 70 | `DirectoryNotFound` |
+| 71 | `FileAlreadyExists` |
+| 72 | `AccessDenied` |
+| 73 | `WriteError` |
+| 74 | `FileNotFound` |
+| 75 | `TextNotFound` |
+| 76 | `InvalidFilePath` |
+| 77 | `ReadError` |
+| 78 | `FileLocked` |
+| 79 | `InvalidFileOperation` |
+
+Codes 80–100 are unused.
+
+Important:
+
+- On Windows, `c:` refers to the actual C: drive. On Linux and Android, `c:` maps to `~/ster_drives/c`. This location can be changed with the `STER_DRIVES` environment variable.
+- File and folder names may contain letters, digits, underscores (`_`), and periods. Hyphens, spaces, and names beginning with a digit are not supported. On Linux, names are case-sensitive: `notes.TXT` and `notes.txt` are different files.
+- Paths containing `..` are not allowed. Symbolic links in paths are prohibited (error 76). The root of a drive cannot be deleted.
+- Text to be written must be a string or a variable reference in the form `var=name`.
