@@ -509,3 +509,46 @@ Important:
 - File and folder names may contain letters, digits, underscores (`_`), and periods. Hyphens, spaces, and names beginning with a digit are not supported. On Linux, names are case-sensitive: `notes.TXT` and `notes.txt` are different files.
 - Paths containing `..` are not allowed. Symbolic links in paths are prohibited (error 76). The root of a drive cannot be deleted.
 - Text to be written must be a string or a variable reference in the form `var=name`.
+
+
+Installation
+
+STER is available for Windows, Linux, and Android.
+
+ Android (Termux)
+
+1. Download `ster-1.0-android.tar.gz`.
+2. Open Termux.
+3. Navigate to the directory where you downloaded the archive.
+4. Run the installation script:
+
+sh install.sh
+
+ Linux
+
+1. Download `ster-1.0-linux-x86_64.tar.gz`.
+2. Extract the archive.
+3. Open a terminal in the extracted directory.
+4. Run:
+
+sudo ./install.sh
+
+Windows
+
+1. Download `windowsSTER-1.0-Setup.exe`.
+2. Open the installer.
+3. Follow the installation instructions.
+
+Checking the installation
+
+Open a terminal, CMD, or Termux and run:
+
+ster -version
+
+Expected output:
+
+STER Compiler 1.0
+Target:
+platform: ...
+
+The platform information depends on your operating system.
