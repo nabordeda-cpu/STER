@@ -1,4 +1,4 @@
-# STER 1.0 Beta Guide
+# STER 1.0 Guide
 
 STER 1.0 Beta language · STER Compiler 1.0
 
