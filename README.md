@@ -2,6 +2,12 @@
 
 STER 1.0 Beta language · STER Compiler 1.0
 
+## Disclaimer
+
+STER is a general-purpose programming language intended for educational and legitimate software development purposes.
+
+The author is not responsible for misuse of the language by third parties. Users are responsible for ensuring that their programs comply with applicable laws.
+
 ## 1. Running a program
 
 ```text
